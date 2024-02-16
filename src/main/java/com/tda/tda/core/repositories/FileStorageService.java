@@ -1,4 +1,4 @@
-package com.tda.tda.infrastructure.services;
+package com.tda.tda.core.repositories;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
