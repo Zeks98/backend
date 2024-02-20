@@ -17,11 +17,13 @@ public class TdaRepositoryImpl implements TdaRepository {
 
         var result = this.entityManager.createStoredProcedureQuery("sp_tda_add");
         result.registerStoredProcedureParameter("name", String.class, ParameterMode.IN);
-        result.registerStoredProcedureParameter("content", String.class, ParameterMode.IN);
+        result.registerStoredProcedureParameter("file_name", String.class, ParameterMode.IN);
+        result.registerStoredProcedureParameter("file_content", String.class, ParameterMode.IN);
         result.registerStoredProcedureParameter("success", Integer.class, ParameterMode.OUT);
 
         result.setParameter("name", "admin");
-        result.setParameter("content", file);
+        result.setParameter("file_name", "ime_fajla");
+        result.setParameter("file_content", file);
 
         result.execute();
 
