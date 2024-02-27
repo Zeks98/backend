@@ -2,10 +2,7 @@ package com.tda.tda.infrastructure.services;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.stream.Stream;
 
 import com.tda.tda.core.repositories.FileStorageService;
@@ -29,10 +26,14 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
+
+
     @Override
     public void save(MultipartFile file) {
+
+        String originalFileName = file.getOriginalFilename();
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+            Files.copy(file.getInputStream(),  this.root.resolve(originalFileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             if (e instanceof FileAlreadyExistsException) {
                 throw new RuntimeException("A file of that name already exists.");

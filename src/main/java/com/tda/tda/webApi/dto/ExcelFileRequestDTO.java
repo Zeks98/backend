@@ -1,6 +1,6 @@
 package com.tda.tda.webApi.dto;
 
-public class ExcelFileDTO {
+public class ExcelFileRequestDTO {
     private String excelFile;
 
     // Getter and setter

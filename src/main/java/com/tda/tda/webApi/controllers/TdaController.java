@@ -1,36 +1,44 @@
 package com.tda.tda.webApi.controllers;
 
-import com.tda.tda.core.models.FileInfo;
 import com.tda.tda.core.services.TdaService;
+import com.tda.tda.infrastructure.sql.entities.TdaEntity;
 import com.tda.tda.message.ResponseMessage;
-import com.tda.tda.webApi.dto.ExcelFileDTO;
+import com.tda.tda.webApi.dto.ExcelFileRequestDTO;
+import com.tda.tda.webApi.dto.TdaResponseDTO;
+import com.tda.tda.webApi.dto.TdaSingleResponseDTO;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class TdaController {
 
     @Autowired
     private TdaService tdaService;
 
-    @CrossOrigin(origins = "http://localhost:4200")
+    private final ModelMapper mapper;
+
+    public TdaController(ModelMapper mapper) {
+        this.mapper = mapper;
+    }
+
     @PostMapping("/upload")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestBody ExcelFileDTO excelFile) {
+    public ResponseEntity<ResponseMessage> uploadFile(@RequestBody ExcelFileRequestDTO excelFile) {
         String message = "upload done";
         try {
+            List<TdaEntity> fileList = new ArrayList<>();
+            fileList.add(new TdaEntity());
 
             tdaService.saveFile(excelFile.getExcelFile());
 
-           // message = "Uploaded the file successfully: " + file.getOriginalFilename();
+            // message = "Uploaded the file successfully: " + file.getOriginalFilename();
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
         } catch (Exception e) {
             //message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
@@ -38,29 +46,41 @@ public class TdaController {
         }
     }
 
-
     @GetMapping("/files")
-    public /*ResponseEntity<List<FileInfo>>*/ String getListFiles() {
-       /* List<FileInfo> fileInfos = tdaService.loadAll().map(path -> {
-            String filename = path.getFileName().toString();
-            String url = MvcUriComponentsBuilder
-                    .fromMethodName(TdaService.class, "getFile", path.getFileName().toString()).build().toString();
+    public List<TdaSingleResponseDTO> getFiles() {
+        var files = new ArrayList<TdaSingleResponseDTO>();
 
-            return new FileInfo(filename, url);
-        }).collect(Collectors.toList());
+        try {
+            var result = this.tdaService.getAllFiles();
 
-        return ResponseEntity.status(HttpStatus.OK).body(fileInfos);*/
+            // map from CORE to DTO model
 
-        return "";
+            // fill "files" variable after mapping and return it
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+
+        return files;
     }
 
-    @GetMapping("/files/{filename:.+}")
-    @ResponseBody
-    public /*ResponseEntity<Resource>*/ void getFile(@PathVariable String filename) {
-        /*Resource file = tdaService.load(filename);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);*/
+    @GetMapping
+    public TdaResponseDTO getContentById(@PathVariable UUID id) {
+        var file = new TdaResponseDTO();
+        try {
+            var result = this.tdaService.getContentById(id);
+
+            // map from CORE to DTO model
+
+            // fill "file" variable after mapping and return it
+
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+
+        return file;
     }
+
+
 }
 //    private boolean isValidExcelFile(String file) {
 //        try {

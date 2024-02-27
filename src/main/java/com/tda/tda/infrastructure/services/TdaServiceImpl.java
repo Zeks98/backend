@@ -1,19 +1,21 @@
 package com.tda.tda.infrastructure.services;
 
 import com.tda.tda.core.models.ExcelData;
+import com.tda.tda.core.repositories.TdaFileRepository;
 import com.tda.tda.core.repositories.TdaRepository;
 import com.tda.tda.core.services.TdaService;
+import com.tda.tda.core.models.Tda;
+import com.tda.tda.infrastructure.sql.entities.TdaEntity;
+import com.tda.tda.infrastructure.sql.entities.TdaFileEntity;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TdaServiceImpl implements TdaService {
@@ -21,14 +23,73 @@ public class TdaServiceImpl implements TdaService {
     @Autowired
     private TdaRepository tdaRepository;
 
+    @Autowired
+    private TdaFileRepository tdaFileRepository;
+
+    private final ModelMapper mapper;
+
+    public TdaServiceImpl(ModelMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    @Override
+    public List<TdaEntity> getAllFiles() {
+        // fetch all the files form database
+        return tdaRepository.findAll();
+    }
+
+    @Override
+    public void saveAllFilesList(List<TdaEntity> fileList) {
+        for (TdaEntity fileModal : fileList)
+            this.tdaRepository.save(fileModal);
+    }
+
     @Override
     public boolean saveFile(String file) throws IOException {
-        var result = this.tdaRepository.saveFile(file);
+        var tdaEntity = new TdaEntity();
+        tdaEntity.setName("zeljko");
+        tdaEntity.setFileName("appi");
+        tdaEntity.setFileContent(file);
+
+        var result = this.tdaRepository.save(tdaEntity);
 
         // process file rows and columns
         var processed = this.processColumns(file);
-        return result;
+
+        for (var p : processed) {
+            // this.saveChunkedData(p);
+
+            var tdaFileEntity = new TdaFileEntity();
+            tdaFileEntity.setFirstName(p.getColumns().get("ime"));
+            tdaFileEntity.setEducation(p.getColumns().get("fakultet"));
+            tdaFileEntity.setLastName(p.getColumns().get("prezime"));
+            tdaFileEntity.setJob(p.getColumns().get("posao"));
+            tdaFileEntity.setJob_e(p.getColumns().get("zanimanje"));
+            this.tdaFileRepository.save(tdaFileEntity);
+
+
+        }
+        return true;
     }
+
+    @Override
+    public List<Tda> getContentById(UUID id) {
+        var result = this.tdaFileRepository.findById(id);
+
+        // map from DB model to CORE model, from result -> mapped
+
+        // return mapped model
+
+        return new ArrayList<>();
+    }
+//
+//    @Override
+//    public List<String> getContentById(String filename) {
+//        var result = this.tdaRepository.getContentById(filename);
+//        var mappedResult = new ArrayList<String>(); //// map here;
+//
+//        return mappedResult;
+//    }
 
     private static String removeTrailingSlash(String str) {
         if (str != null && str.endsWith("/")) {
@@ -36,6 +97,7 @@ public class TdaServiceImpl implements TdaService {
         }
         return str;
     }
+
     private List<ExcelData> processColumns(String file) throws IOException {
         List<ExcelData> excelDataList = new ArrayList<>();
 
@@ -70,8 +132,7 @@ public class TdaServiceImpl implements TdaService {
             }
             excelDataList.add(excelData);
         }
-
-        workbook.close();
         return excelDataList;
     }
+
 }
