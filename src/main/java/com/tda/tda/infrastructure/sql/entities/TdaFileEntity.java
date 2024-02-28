@@ -13,22 +13,25 @@ import java.util.UUID;
 public class TdaFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private Long id;
 
     @Lob
-    @Column(name = "First_name")
-    private String FirstName;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @Column (name="Last_Name")
-    private String LastName;
+    @Column (name="last_Name")
+    private String lastName;
 
-    @Column (name = "Job")
+    @Column (name = "job")
     private String job;
 
-    @Column(name = "Education")
+    @Column(name = "education")
     private String education;
 
-    @Column (name = "Job_Education")
-    private String job_e;
+    @Column (name = "job_education")
+    private String jobE;
+
+    @Column(name = "file_id")
+    private Long fileId;
 
 }

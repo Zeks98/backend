@@ -1,6 +1,7 @@
 package com.tda.tda.infrastructure.services;
 
 import com.tda.tda.core.models.ExcelData;
+import com.tda.tda.core.models.TdaSingle;
 import com.tda.tda.core.repositories.TdaFileRepository;
 import com.tda.tda.core.repositories.TdaRepository;
 import com.tda.tda.core.services.TdaService;
@@ -11,10 +12,12 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Array;
 import java.util.*;
 
 @Service
@@ -26,16 +29,24 @@ public class TdaServiceImpl implements TdaService {
     @Autowired
     private TdaFileRepository tdaFileRepository;
 
-    private final ModelMapper mapper;
+    @Autowired
+    @Qualifier("mapper")
+    private ModelMapper mapper;
 
-    public TdaServiceImpl(ModelMapper mapper) {
-        this.mapper = mapper;
+    public TdaServiceImpl() {
+
     }
 
     @Override
-    public List<TdaEntity> getAllFiles() {
+    public List<TdaSingle> getAllFiles() {
         // fetch all the files form database
-        return tdaRepository.findAll();
+        var result = tdaRepository.findAll();
+        var mapped = new ArrayList<TdaSingle>();
+
+        for (var x : result) {
+            mapped.add(mapper.map(x, TdaSingle.class));
+        }
+        return mapped;
     }
 
     @Override
@@ -45,42 +56,54 @@ public class TdaServiceImpl implements TdaService {
     }
 
     @Override
-    public boolean saveFile(String file) throws IOException {
-        var tdaEntity = new TdaEntity();
-        tdaEntity.setName("zeljko");
-        tdaEntity.setFileName("appi");
-        tdaEntity.setFileContent(file);
+    public List<Tda> saveFile(String file) {
+        try {
+            var tdaEntity = new TdaEntity();
+            tdaEntity.setName("zeljko");
+            tdaEntity.setFileName("appi");
+            tdaEntity.setFileContent(file);
 
-        var result = this.tdaRepository.save(tdaEntity);
+            var result = this.tdaRepository.save(tdaEntity);
 
-        // process file rows and columns
-        var processed = this.processColumns(file);
+            // process file rows and columns
+            var processed = this.processColumns(file);
 
-        for (var p : processed) {
-            // this.saveChunkedData(p);
+            for (var p : processed) {
+                // this.saveChunkedData(p);
 
-            var tdaFileEntity = new TdaFileEntity();
-            tdaFileEntity.setFirstName(p.getColumns().get("ime"));
-            tdaFileEntity.setEducation(p.getColumns().get("fakultet"));
-            tdaFileEntity.setLastName(p.getColumns().get("prezime"));
-            tdaFileEntity.setJob(p.getColumns().get("posao"));
-            tdaFileEntity.setJob_e(p.getColumns().get("zanimanje"));
-            this.tdaFileRepository.save(tdaFileEntity);
+                var tdaFileEntity = new TdaFileEntity();
+                tdaFileEntity.setFirstName(p.getColumns().get("ime"));
+                tdaFileEntity.setEducation(p.getColumns().get("fakultet"));
+                tdaFileEntity.setLastName(p.getColumns().get("prezime"));
+                tdaFileEntity.setJob(p.getColumns().get("posao"));
+                tdaFileEntity.setJobE(p.getColumns().get("zanimanje"));
+                tdaFileEntity.setFileId(result.getId());
+                this.tdaFileRepository.save(tdaFileEntity);
+            }
 
+            var all = this.getContentById(result.getId());
 
+            // map with model mapper
+
+            return all;
+        } catch (Exception ex) {
+            return null;
         }
-        return true;
     }
 
     @Override
-    public List<Tda> getContentById(UUID id) {
-        var result = this.tdaFileRepository.findById(id);
+    public List<Tda> getContentById(Long id) {
+        var result = this.tdaFileRepository.findByFileId(id);
 
         // map from DB model to CORE model, from result -> mapped
+        var mapped = new ArrayList<Tda>();
 
+        for (var x : result) {
+            mapped.add(mapper.map(x, Tda.class));
+        }
         // return mapped model
 
-        return new ArrayList<>();
+        return mapped;
     }
 //
 //    @Override

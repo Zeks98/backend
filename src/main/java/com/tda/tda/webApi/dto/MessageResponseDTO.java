@@ -1,8 +1,8 @@
-package com.tda.tda.message;
-public class ResponseMessage {
+package com.tda.tda.webApi.dto;
+public class MessageResponseDTO {
     private String message;
 
-    public ResponseMessage(String message) {
+    public MessageResponseDTO(String message) {
         this.message = message;
     }
 

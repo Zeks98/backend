@@ -2,12 +2,14 @@ package com.tda.tda.webApi.controllers;
 
 import com.tda.tda.core.services.TdaService;
 import com.tda.tda.infrastructure.sql.entities.TdaEntity;
-import com.tda.tda.message.ResponseMessage;
+import com.tda.tda.webApi.dto.MessageResponseDTO;
 import com.tda.tda.webApi.dto.ExcelFileRequestDTO;
 import com.tda.tda.webApi.dto.TdaResponseDTO;
 import com.tda.tda.webApi.dto.TdaSingleResponseDTO;
+import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,26 +25,30 @@ public class TdaController {
     @Autowired
     private TdaService tdaService;
 
-    private final ModelMapper mapper;
+    @Autowired
+    @Qualifier("mapper")
+    private ModelMapper mapper;
 
-    public TdaController(ModelMapper mapper) {
-        this.mapper = mapper;
+    public TdaController() {
+
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestBody ExcelFileRequestDTO excelFile) {
-        String message = "upload done";
+    public ArrayList<TdaResponseDTO> uploadFile(@RequestBody ExcelFileRequestDTO excelFile) {
         try {
-            List<TdaEntity> fileList = new ArrayList<>();
-            fileList.add(new TdaEntity());
+            var result = tdaService.saveFile(excelFile.getExcelFile());
 
-            tdaService.saveFile(excelFile.getExcelFile());
+            var mapped = new ArrayList<TdaResponseDTO>();
 
-            // message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+            for (var x : result) {
+                mapped.add(mapper.map(x, TdaResponseDTO.class));
+            }
+
+            return mapped;
         } catch (Exception e) {
             //message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+            // return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponseDTO(message));
+            return null;
         }
     }
 
@@ -52,10 +58,11 @@ public class TdaController {
 
         try {
             var result = this.tdaService.getAllFiles();
-
             // map from CORE to DTO model
+            for (var x : result) {
+                files.add(mapper.map(x, TdaSingleResponseDTO.class));
+            }
 
-            // fill "files" variable after mapping and return it
         } catch (Exception ex) {
             System.out.println(ex);
         }
@@ -63,21 +70,23 @@ public class TdaController {
         return files;
     }
 
-    @GetMapping
-    public TdaResponseDTO getContentById(@PathVariable UUID id) {
-        var file = new TdaResponseDTO();
+    @GetMapping("/files/{id}")
+    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id) {
+        var data = new ArrayList<TdaResponseDTO>();
+
         try {
             var result = this.tdaService.getContentById(id);
 
             // map from CORE to DTO model
-
-            // fill "file" variable after mapping and return it
+            for (var x : result) {
+                data.add(mapper.map(x, TdaResponseDTO.class));
+            }
 
         } catch (Exception ex) {
             System.out.println(ex);
         }
 
-        return file;
+        return data;
     }
 
 

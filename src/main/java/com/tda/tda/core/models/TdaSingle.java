@@ -1,11 +1,11 @@
-package com.tda.tda.webApi.dto;
+package com.tda.tda.core.models;
 
 import lombok.Getter;
 import lombok.Setter;
-
+//
 @Getter
 @Setter
-public class TdaSingleResponseDTO {
+public class TdaSingle {
 
     private Long id;
 
