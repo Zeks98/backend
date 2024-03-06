@@ -83,6 +83,26 @@ public class TdaController {
         return data;
     }
 
+    @GetMapping("/filter/{fileId}/{searchTerm}")
+    public ArrayList<TdaResponseDTO> filterBySearchTerm(@PathVariable int fileId, @PathVariable String searchTerm) {
+        var data = new ArrayList<TdaResponseDTO>();
+
+        try {
+            var files = this.tdaService.getFilteredFilesBySearchTerm(fileId, searchTerm);
+
+            // map from CORE to DTO model
+            for (var x : files) {
+                data.add(mapper.map(x, TdaResponseDTO.class));
+            }
+
+            return data;
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+
+        return data;
+    }
+
 
 }
 //    private boolean isValidExcelFile(String file) {

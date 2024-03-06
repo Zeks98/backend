@@ -2,6 +2,7 @@ package com.tda.tda.infrastructure.services;
 
 import com.tda.tda.core.models.ExcelData;
 import com.tda.tda.core.models.TdaSingle;
+import com.tda.tda.core.repositories.TdaFileExtendedRepository;
 import com.tda.tda.core.repositories.TdaFileRepository;
 import com.tda.tda.core.repositories.TdaRepository;
 import com.tda.tda.core.services.TdaService;
@@ -104,14 +105,34 @@ public class TdaServiceImpl implements TdaService {
 
         return mapped;
     }
-//
-//    @Override
-//    public List<String> getContentById(String filename) {
-//        var result = this.tdaRepository.getContentById(filename);
-//        var mappedResult = new ArrayList<String>(); //// map here;
-//
-//        return mappedResult;
-//    }
+
+    public List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm) {
+        List<TdaFileEntity> result;
+        switch (searchTerm) {
+            case "!":
+                result = this.tdaFileRepository.findAll().stream().filter(x ->
+                        x.getFileId() == fileId).toList();
+                break;
+            default:
+                result = this.tdaFileRepository.findAll().stream().filter(x ->
+                        (x.getFirstName().toLowerCase().contains(searchTerm.toLowerCase())
+                                || x.getLastName().toLowerCase().contains(searchTerm.toLowerCase())
+                                || x.getJob().toLowerCase().contains(searchTerm.toLowerCase())
+                                || x.getEducation().toLowerCase().contains(searchTerm.toLowerCase())
+                                || x.getJobE().toLowerCase().contains(searchTerm.toLowerCase())) && x.getFileId() == fileId).toList();
+                break;
+        }
+
+        // map from DB model to CORE model, from result -> mapped
+        var mapped = new ArrayList<Tda>();
+
+        for (var x : result) {
+            mapped.add(mapper.map(x, Tda.class));
+        }
+        // return mapped model
+
+        return mapped;
+    }
 
     private static String removeTrailingSlash(String str) {
         if (str != null && str.endsWith("/")) {

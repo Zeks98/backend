@@ -14,10 +14,11 @@ public interface TdaService {
 
     public List<Tda> getContentById(Long id);
 
-
     List<TdaSingle> getAllFiles();
 
     void saveAllFilesList(List<TdaEntity> fileList);
+
+    List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm);
 
     // DoubleStream loadAll();
 
