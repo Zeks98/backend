@@ -12,13 +12,13 @@ public interface TdaService {
 
     public List<Tda> saveFile(String file);
 
-    public List<Tda> getContentById(Long id);
+    public List<Tda> getContentById(Long id, String sortBy);
 
     List<TdaSingle> getAllFiles();
 
     void saveAllFilesList(List<TdaEntity> fileList);
 
-    List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm);
+    List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm, String sortBy);
 
     // DoubleStream loadAll();
 

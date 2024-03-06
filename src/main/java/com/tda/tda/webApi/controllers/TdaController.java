@@ -64,12 +64,12 @@ public class TdaController {
         return files;
     }
 
-    @GetMapping("/files/{id}")
-    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id) {
+    @GetMapping("/files/{id}/{sortedBy}")
+    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id, @PathVariable String sortedBy) {
         var data = new ArrayList<TdaResponseDTO>();
 
         try {
-            var result = this.tdaService.getContentById(id);
+            var result = this.tdaService.getContentById(id, sortedBy);
 
             // map from CORE to DTO model
             for (var x : result) {
@@ -83,12 +83,12 @@ public class TdaController {
         return data;
     }
 
-    @GetMapping("/filter/{fileId}/{searchTerm}")
-    public ArrayList<TdaResponseDTO> filterBySearchTerm(@PathVariable int fileId, @PathVariable String searchTerm) {
+    @GetMapping("/filter/{fileId}/{searchTerm}/{sortBy}")
+    public ArrayList<TdaResponseDTO> filterBySearchTerm(@PathVariable int fileId, @PathVariable String searchTerm, @PathVariable String sortBy) {
         var data = new ArrayList<TdaResponseDTO>();
 
         try {
-            var files = this.tdaService.getFilteredFilesBySearchTerm(fileId, searchTerm);
+            var files = this.tdaService.getFilteredFilesBySearchTerm(fileId, searchTerm, sortBy);
 
             // map from CORE to DTO model
             for (var x : files) {

@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TdaServiceImpl implements TdaService {
@@ -81,7 +83,7 @@ public class TdaServiceImpl implements TdaService {
                 this.tdaFileRepository.save(tdaFileEntity);
             }
 
-            var all = this.getContentById(result.getId());
+            var all = this.getContentById(result.getId(), "firstName");
 
             // map with model mapper
 
@@ -92,7 +94,7 @@ public class TdaServiceImpl implements TdaService {
     }
 
     @Override
-    public List<Tda> getContentById(Long id) {
+    public List<Tda> getContentById(Long id, String sortBy)  {
         var result = this.tdaFileRepository.findByFileId(id);
 
         // map from DB model to CORE model, from result -> mapped
@@ -103,10 +105,13 @@ public class TdaServiceImpl implements TdaService {
         }
         // return mapped model
 
-        return mapped;
+        var sorted = this.getSortedBy(mapped, sortBy);
+        // return mapped model
+
+        return sorted;
     }
 
-    public List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm) {
+    public List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm, String sortBy) {
         List<TdaFileEntity> result;
         switch (searchTerm) {
             case "!":
@@ -129,9 +134,12 @@ public class TdaServiceImpl implements TdaService {
         for (var x : result) {
             mapped.add(mapper.map(x, Tda.class));
         }
+
+        // sort
+        var sorted = this.getSortedBy(mapped, sortBy);
         // return mapped model
 
-        return mapped;
+        return sorted;
     }
 
     private static String removeTrailingSlash(String str) {
@@ -178,4 +186,19 @@ public class TdaServiceImpl implements TdaService {
         return excelDataList;
     }
 
+    private <T> List<T> getSortedBy(List<T> items, String sortBy) {
+        try {
+            Method getterMethod = Tda.class.getMethod("get" + sortBy.substring(0, 1).toUpperCase() + sortBy.substring(1));
+            Comparator<T> comparator = Comparator.comparing(p -> {
+                try {
+                    return (Comparable) getterMethod.invoke(p);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return items.stream().sorted(comparator).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid property name for sorting: " + sortBy);
+        }
+    }
 }
