@@ -21,4 +21,7 @@ public interface TdaService {
     List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm, String sortBy);
 
     Tda updateRow(Tda row);
+
+    boolean deleteRow(Long id);
+
 }

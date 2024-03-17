@@ -112,6 +112,7 @@ public class TdaServiceImpl implements TdaService {
         return sorted;
     }
 
+    @Override
     public List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm, String sortBy) {
         List<TdaFileEntity> result;
         switch (searchTerm) {
@@ -143,6 +144,7 @@ public class TdaServiceImpl implements TdaService {
         return sorted;
     }
 
+    @Override
     public Tda updateRow(Tda row) {
         var result = this.tdaFileRepository.findById(row.getId());
 
@@ -158,6 +160,19 @@ public class TdaServiceImpl implements TdaService {
         this.tdaFileRepository.save(result.get());
 
         return this.mapper.map(this.tdaFileRepository.findById(row.getId()).get(), Tda.class);
+    }
+
+    @Override
+    public boolean deleteRow(Long id) {
+        var row = this.tdaFileRepository.findById(id);
+
+        if (Optional.of(row).isPresent() == true) {
+            this.tdaFileRepository.delete(row.get());
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private static String removeTrailingSlash(String str) {

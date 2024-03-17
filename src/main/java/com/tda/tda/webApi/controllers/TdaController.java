@@ -122,6 +122,16 @@ public class TdaController {
         return data;
     }
 
+    @DeleteMapping("/{id}")
+    public boolean deleteUser(@PathVariable Long id) {
+        boolean result = false;
+        try {
+            result = this.tdaService.deleteRow(id);
+        } catch (Exception ex) {
+        }
+
+        return result;
+    }
 }
 //    private boolean isValidExcelFile(String file) {
 //        try {
