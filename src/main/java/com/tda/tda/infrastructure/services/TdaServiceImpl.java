@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -94,7 +95,7 @@ public class TdaServiceImpl implements TdaService {
     }
 
     @Override
-    public List<Tda> getContentById(Long id, String sortBy)  {
+    public List<Tda> getContentById(Long id, String sortBy) {
         var result = this.tdaFileRepository.findByFileId(id);
 
         // map from DB model to CORE model, from result -> mapped
@@ -140,6 +141,23 @@ public class TdaServiceImpl implements TdaService {
         // return mapped model
 
         return sorted;
+    }
+
+    public Tda updateRow(Tda row) {
+        var result = this.tdaFileRepository.findById(row.getId());
+
+        if (Optional.of(result).isPresent() == true) {
+            result.get().setFirstName(row.getFirstName());
+            result.get().setLastName(row.getLastName());
+            result.get().setEducation(row.getEducation());
+            result.get().setJob(row.getJob());
+            result.get().setJobE(row.getJobE());
+        } else {
+            // throw new Exception("Row not found");
+        }
+        this.tdaFileRepository.save(result.get());
+
+        return this.mapper.map(this.tdaFileRepository.findById(row.getId()).get(), Tda.class);
     }
 
     private static String removeTrailingSlash(String str) {

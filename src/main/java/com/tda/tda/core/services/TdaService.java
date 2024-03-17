@@ -20,7 +20,5 @@ public interface TdaService {
 
     List<Tda> getFilteredFilesBySearchTerm(int fileId, String searchTerm, String sortBy);
 
-    // DoubleStream loadAll();
-
-//    Resource load(String filename);
+    Tda updateRow(Tda row);
 }

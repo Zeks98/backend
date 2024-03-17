@@ -1,7 +1,10 @@
 package com.tda.tda.webApi.controllers;
 
+import com.tda.tda.core.models.Tda;
+import com.tda.tda.core.models.TdaSingle;
 import com.tda.tda.core.services.TdaService;
 import com.tda.tda.webApi.dto.ExcelFileRequestDTO;
+import com.tda.tda.webApi.dto.TdaRequestDTO;
 import com.tda.tda.webApi.dto.TdaResponseDTO;
 import com.tda.tda.webApi.dto.TdaSingleResponseDTO;
 import org.modelmapper.ModelMapper;
@@ -97,12 +100,27 @@ public class TdaController {
 
             return data;
         } catch (Exception ex) {
-            System.out.println(ex);
         }
 
         return data;
     }
 
+    @PutMapping("/{id}")
+    public TdaResponseDTO updateUser(@PathVariable int id, @RequestBody TdaRequestDTO row) {
+        var data = new TdaResponseDTO();
+
+        try {
+            var mapToPass = mapper.map(row, Tda.class);
+            var file = this.tdaService.updateRow(mapToPass);
+
+            // response
+            data = mapper.map(file, TdaResponseDTO.class);
+
+        } catch (Exception ex) {
+        }
+
+        return data;
+    }
 
 }
 //    private boolean isValidExcelFile(String file) {
