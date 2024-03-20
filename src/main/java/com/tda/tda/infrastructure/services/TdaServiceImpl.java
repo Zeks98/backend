@@ -42,7 +42,6 @@ public class TdaServiceImpl implements TdaService {
 
     @Override
     public List<TdaSingle> getAllFiles() {
-        // fetch all the files form database
         var result = tdaRepository.findAll();
         var mapped = new ArrayList<TdaSingle>();
 
@@ -63,16 +62,14 @@ public class TdaServiceImpl implements TdaService {
         try {
             var tdaEntity = new TdaEntity();
             tdaEntity.setName("zeljko");
-            tdaEntity.setFileName("appi");
+            tdaEntity.setFileName("proba");
             tdaEntity.setFileContent(file);
 
             var result = this.tdaRepository.save(tdaEntity);
 
-            // process file rows and columns
             var processed = this.processColumns(file);
 
             for (var p : processed) {
-                // this.saveChunkedData(p);
 
                 var tdaFileEntity = new TdaFileEntity();
                 tdaFileEntity.setFirstName(p.getColumns().get("ime"));
@@ -86,7 +83,7 @@ public class TdaServiceImpl implements TdaService {
 
             var all = this.getContentById(result.getId(), "firstName");
 
-            // map with model mapper
+
 
             return all;
         } catch (Exception ex) {
@@ -98,16 +95,13 @@ public class TdaServiceImpl implements TdaService {
     public List<Tda> getContentById(Long id, String sortBy) {
         var result = this.tdaFileRepository.findByFileId(id);
 
-        // map from DB model to CORE model, from result -> mapped
         var mapped = new ArrayList<Tda>();
 
         for (var x : result) {
             mapped.add(mapper.map(x, Tda.class));
         }
-        // return mapped model
 
         var sorted = this.getSortedBy(mapped, sortBy);
-        // return mapped model
 
         return sorted;
     }
@@ -130,16 +124,13 @@ public class TdaServiceImpl implements TdaService {
                 break;
         }
 
-        // map from DB model to CORE model, from result -> mapped
         var mapped = new ArrayList<Tda>();
 
         for (var x : result) {
             mapped.add(mapper.map(x, Tda.class));
         }
 
-        // sort
         var sorted = this.getSortedBy(mapped, sortBy);
-        // return mapped model
 
         return sorted;
     }
@@ -155,7 +146,6 @@ public class TdaServiceImpl implements TdaService {
             result.get().setJob(row.getJob());
             result.get().setJobE(row.getJobE());
         } else {
-            // throw new Exception("Row not found");
         }
         this.tdaFileRepository.save(result.get());
 
@@ -188,12 +178,12 @@ public class TdaServiceImpl implements TdaService {
         Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(Base64.getDecoder().decode(file)));
         Sheet sheet = workbook.getSheetAt(0);
 
-        // Read headers (first row) to determine column order
+
         Row headerRow = sheet.getRow(0);
         List<String> columnOrder = new ArrayList<>();
         for (int i = 0; i < headerRow.getLastCellNum(); i++) {
             Cell cell = headerRow.getCell(i);
-            String header = cell == null ? "" : cell.getStringCellValue().trim(); // Trim any whitespace
+            String header = cell == null ? "" : cell.getStringCellValue().trim();
             columnOrder.add(removeTrailingSlash(header));
         }
 
@@ -201,7 +191,7 @@ public class TdaServiceImpl implements TdaService {
         while (iterator.hasNext()) {
             Row currentRow = iterator.next();
             if (currentRow.getRowNum() == 0) {
-                continue; // Skip header row
+                continue;
             }
 
             ExcelData excelData = new ExcelData();

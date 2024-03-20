@@ -43,8 +43,6 @@ public class TdaController {
 
             return mapped;
         } catch (Exception e) {
-            //message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
-            // return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponseDTO(message));
             return null;
         }
     }
@@ -55,7 +53,7 @@ public class TdaController {
 
         try {
             var result = this.tdaService.getAllFiles();
-            // map from CORE to DTO model
+
             for (var x : result) {
                 files.add(mapper.map(x, TdaSingleResponseDTO.class));
             }
@@ -74,7 +72,6 @@ public class TdaController {
         try {
             var result = this.tdaService.getContentById(id, sortedBy);
 
-            // map from CORE to DTO model
             for (var x : result) {
                 data.add(mapper.map(x, TdaResponseDTO.class));
             }
@@ -93,7 +90,6 @@ public class TdaController {
         try {
             var files = this.tdaService.getFilteredFilesBySearchTerm(fileId, searchTerm, sortBy);
 
-            // map from CORE to DTO model
             for (var x : files) {
                 data.add(mapper.map(x, TdaResponseDTO.class));
             }
@@ -113,7 +109,6 @@ public class TdaController {
             var mapToPass = mapper.map(row, Tda.class);
             var file = this.tdaService.updateRow(mapToPass);
 
-            // response
             data = mapper.map(file, TdaResponseDTO.class);
 
         } catch (Exception ex) {
@@ -133,27 +128,3 @@ public class TdaController {
         return result;
     }
 }
-//    private boolean isValidExcelFile(String file) {
-//        try {
-//            // Decode Base64 string to byte array
-//            byte[] decodedBytes = Base64.decodeBase64(file);
-//
-//            // Write byte array to a temporary file
-//            String tempFilePath = "temp.xlsx"; // Temporary file path
-//            try (FileOutputStream fos = new FileOutputStream(tempFilePath)) {
-//                fos.write(decodedBytes);
-//            }
-//
-//            // Validate the file as an Excel file using Apache POI
-//            Workbook workbook = WorkbookFactory.create(new File(tempFilePath));
-//            // If no exception is thrown, it indicates that the file is a valid Excel file
-//            workbook.close();
-//        } catch (Exception ex) {
-//            System.out.println(ex);
-//            return false;
-//        }
-//
-//        return true;
-//    }
-//
-//}
