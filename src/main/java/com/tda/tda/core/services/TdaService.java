@@ -12,7 +12,7 @@ public interface TdaService {
 
     public List<Tda> saveFile(String file);
 
-    public List<Tda> getContentById(Long id, String sortBy);
+    public List<Tda> getContentById(Long id, int page, int pageSize, String sortBy);
 
     List<TdaSingle> getAllFiles();
 

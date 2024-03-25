@@ -66,11 +66,11 @@ public class TdaController {
     }
 
     @GetMapping("/files/{id}/{sortedBy}")
-    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id, @PathVariable String sortedBy) {
+    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id, @PathVariable String sortedBy, @RequestParam int page, @RequestParam int pageSize) {
         var data = new ArrayList<TdaResponseDTO>();
 
         try {
-            var result = this.tdaService.getContentById(id, sortedBy);
+            var result = this.tdaService.getContentById(id, page, pageSize, sortedBy);
 
             for (var x : result) {
                 data.add(mapper.map(x, TdaResponseDTO.class));

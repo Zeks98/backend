@@ -14,6 +14,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
@@ -81,9 +83,7 @@ public class TdaServiceImpl implements TdaService {
                 this.tdaFileRepository.save(tdaFileEntity);
             }
 
-            var all = this.getContentById(result.getId(), "firstName");
-
-
+            var all = this.getContentById(result.getId(), 1, 10, "firstName");
 
             return all;
         } catch (Exception ex) {
@@ -92,18 +92,33 @@ public class TdaServiceImpl implements TdaService {
     }
 
     @Override
-    public List<Tda> getContentById(Long id, String sortBy) {
+    public List<Tda> getContentById(Long id, int page, int pageSize, String sortBy) {
         var result = this.tdaFileRepository.findByFileId(id);
-
-        var mapped = new ArrayList<Tda>();
-
+        List<Tda> mapped = new ArrayList<Tda>();
         for (var x : result) {
             mapped.add(mapper.map(x, Tda.class));
         }
+        mapped = this.getSortedBy(mapped, sortBy);
 
-        var sorted = this.getSortedBy(mapped, sortBy);
+        var itemsCount = mapped.stream().count();
+        var pagesCount = (int) Math.ceil(itemsCount / (double) pageSize);
+        if (page > pagesCount) {
+            page = pagesCount;
+        }
 
-        return sorted;
+        if (page < 1) {
+            page = 1;
+        }
+        var startIndex = (page - 1) * pageSize;
+        var endIndex = (int) Math.min(startIndex + pageSize - 1, itemsCount - 1);
+
+        if (endIndex + 1 == itemsCount) {
+            mapped = mapped.subList(startIndex, endIndex + 1);
+        } else {
+            mapped = mapped.subList(startIndex, endIndex);
+        }
+
+        return mapped;
     }
 
     @Override
