@@ -1,12 +1,9 @@
 package com.tda.tda.webApi.controllers;
 
+import com.tda.tda.core.models.PaginatedResult;
 import com.tda.tda.core.models.Tda;
-import com.tda.tda.core.models.TdaSingle;
 import com.tda.tda.core.services.TdaService;
-import com.tda.tda.webApi.dto.ExcelFileRequestDTO;
-import com.tda.tda.webApi.dto.TdaRequestDTO;
-import com.tda.tda.webApi.dto.TdaResponseDTO;
-import com.tda.tda.webApi.dto.TdaSingleResponseDTO;
+import com.tda.tda.webApi.dto.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -66,21 +63,27 @@ public class TdaController {
     }
 
     @GetMapping("/files/{id}/{sortedBy}")
-    public ArrayList<TdaResponseDTO> getContentById(@PathVariable Long id, @PathVariable String sortedBy, @RequestParam int page, @RequestParam int pageSize) {
-        var data = new ArrayList<TdaResponseDTO>();
+    public PaginatedResult<ArrayList<TdaResponseDTO>> getContentById(@PathVariable Long id, @PathVariable String sortedBy, @RequestParam int page, @RequestParam int pageSize) {
+        var response = new PaginatedResult<ArrayList<TdaResponseDTO>>();
 
         try {
             var result = this.tdaService.getContentById(id, page, pageSize, sortedBy);
-
-            for (var x : result) {
-                data.add(mapper.map(x, TdaResponseDTO.class));
+            var mappedResult = new ArrayList<TdaResponseDTO>();
+            for (var x : result.getData()) {
+                mappedResult.add(mapper.map(x, TdaResponseDTO.class));
             }
+
+            response.setData(mappedResult);
+            response.setCurrentPage(result.getCurrentPage());
+            response.setPageSize(result.getPageSize());
+            response.setTotalItems(result.getTotalItems());
+            response.setTotalPages(result.getTotalPages());
 
         } catch (Exception ex) {
             System.out.println(ex);
         }
 
-        return data;
+        return response;
     }
 
     @GetMapping("/filter/{fileId}/{searchTerm}/{sortBy}")

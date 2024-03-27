@@ -1,5 +1,6 @@
 package com.tda.tda.core.services;
 
+import com.tda.tda.core.models.PaginatedResult;
 import com.tda.tda.core.models.Tda;
 import com.tda.tda.core.models.TdaSingle;
 import com.tda.tda.infrastructure.sql.entities.TdaEntity;
@@ -12,7 +13,7 @@ public interface TdaService {
 
     public List<Tda> saveFile(String file);
 
-    public List<Tda> getContentById(Long id, int page, int pageSize, String sortBy);
+    public PaginatedResult<List<Tda>> getContentById(Long id, int page, int pageSize, String sortBy);
 
     List<TdaSingle> getAllFiles();
 

@@ -1,6 +1,7 @@
 package com.tda.tda.infrastructure.services;
 
 import com.tda.tda.core.models.ExcelData;
+import com.tda.tda.core.models.PaginatedResult;
 import com.tda.tda.core.models.TdaSingle;
 import com.tda.tda.core.repositories.TdaFileExtendedRepository;
 import com.tda.tda.core.repositories.TdaFileRepository;
@@ -85,14 +86,14 @@ public class TdaServiceImpl implements TdaService {
 
             var all = this.getContentById(result.getId(), 1, 10, "firstName");
 
-            return all;
+            return all.getData();
         } catch (Exception ex) {
             return null;
         }
     }
 
     @Override
-    public List<Tda> getContentById(Long id, int page, int pageSize, String sortBy) {
+    public PaginatedResult<List<Tda>> getContentById(Long id, int page, int pageSize, String sortBy) {
         var result = this.tdaFileRepository.findByFileId(id);
         List<Tda> mapped = new ArrayList<Tda>();
         for (var x : result) {
@@ -118,7 +119,14 @@ public class TdaServiceImpl implements TdaService {
             mapped = mapped.subList(startIndex, endIndex);
         }
 
-        return mapped;
+        var response = new PaginatedResult<List<Tda>>();
+        response.setTotalPages(pagesCount);
+        response.setPageSize(pageSize);
+        response.setCurrentPage(page);
+        response.setTotalItems(result.size());
+        response.setData(mapped);
+
+        return response;
     }
 
     @Override
